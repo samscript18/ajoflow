@@ -1,0 +1,33 @@
+{
+	"expo": {
+		"name": "AjoFlow",
+		"slug": "ajoflow",
+		"scheme": "ajoflow",
+		"version": "1.0.0",
+		"orientation": "portrait",
+		"userInterfaceStyle": "automatic",
+		"newArchEnabled": true,
+		"jsEngine": "hermes",
+		"ios": {
+			"supportsTablet": true,
+			"bundleIdentifier": "com.ajoflow.mobile",
+			"infoPlist": {
+				"ITSAppUsesNonExemptEncryption": false
+			}
+		},
+		"android": {
+			"edgeToEdgeEnabled": true,
+			"predictiveBackGestureEnabled": false,
+			"package": "com.ajoflow.mobile"
+		},
+		"web": {
+			"output": "static",
+			"bundler": "metro"
+		},
+		"plugins": ["expo-router", "./plugins/withModularHeaders", "expo-font", "expo-web-browser", "expo-secure-store"],
+		"experiments": {
+			"typedRoutes": true,
+			"reactCompiler": true
+		}
+	}
+}
