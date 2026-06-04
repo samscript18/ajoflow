@@ -10,7 +10,7 @@
 		"jsEngine": "hermes",
 		"ios": {
 			"supportsTablet": true,
-			"bundleIdentifier": "com.ajoflow.mobile",
+			"bundleIdentifier": "com.samscript.ajoflow",
 			"infoPlist": {
 				"ITSAppUsesNonExemptEncryption": false
 			}
@@ -18,13 +18,9 @@
 		"android": {
 			"edgeToEdgeEnabled": true,
 			"predictiveBackGestureEnabled": false,
-			"package": "com.ajoflow.mobile"
+			"package": "com.samscript.ajoflow"
 		},
-		"web": {
-			"output": "static",
-			"bundler": "metro"
-		},
-		"plugins": ["expo-router", "./plugins/withModularHeaders", "expo-font", "expo-web-browser", "expo-secure-store"],
+		"plugins": ["expo-router", "expo-font", "expo-web-browser", "expo-secure-store"],
 		"experiments": {
 			"typedRoutes": true,
 			"reactCompiler": true
