@@ -1,12 +1,17 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import nodemailer from "nodemailer";
+import { SendMail } from "./interfaces";
 
 @Injectable()
 export class MailService {
 	private readonly logger = new Logger(MailService.name);
 
 	constructor(private readonly config: ConfigService) {}
+
+	async sendMail(dto: SendMail) {
+		return this.send(dto.to, dto.subject, dto.html ?? this.renderTemplate(dto.template, dto.context));
+	}
 
 	async send(to: string, subject: string, html: string) {
 		const host = this.config.get<string>("SMTP_HOST");
@@ -36,5 +41,11 @@ export class MailService {
 			this.logger.error(`Failed to send email to ${to}`, error instanceof Error ? error.stack : error);
 			throw error;
 		}
+	}
+
+	private renderTemplate(template?: string, context: SendMail["context"] = {}) {
+		if (!template) return "";
+
+		return Object.entries(context).reduce((html, [key, value]) => html.replaceAll(`{{${key}}}`, String(value ?? "")), template);
 	}
 }

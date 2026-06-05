@@ -1,71 +1,68 @@
-export type ThemeMode = "light" | "dark";
-
-export type AppTheme = {
-	mode: ThemeMode;
-	colors: {
-		background: string;
-		surface: string;
-		surfaceMuted: string;
-		accentSurface: string;
-		textPrimary: string;
-		textSecondary: string;
-		textMuted: string;
-		primary: string;
-		onPrimary: string;
-		border: string;
-		inputBorder: string;
-		inputFocusBackground: string;
-		buttonDisabled: string;
-		error: string;
-		divider: string;
-		googleBrand: string;
-		dot: string;
-	};
-};
+import { AppTheme, ThemeMode } from "@/types/theme/theme";
 
 export const lightTheme: AppTheme = {
 	mode: "light",
 	colors: {
-		background: "#F7F7FA",
+		background: "#F7F6F2",
 		surface: "#FFFFFF",
-		surfaceMuted: "#F6F6F6",
-		accentSurface: "#F5F3FF",
-		textPrimary: "#161719",
-		textSecondary: "#6B7280",
-		textMuted: "#8A8F9C",
-		primary: "#7F3DFF",
-		onPrimary: "#FFFFFF",
-		border: "#E5E7EB",
-		inputBorder: "#E5E7EB",
-		inputFocusBackground: "#F5F3FF",
+		surfaceMuted: "#F4F1EC",
+		accentSurface: "#F1EEE6",
+		textPrimary: "#1B1B1B",
+		textSecondary: "#697386",
+		textMuted: "#A2A9B8",
+		primary: "#E1AD2D",
+		onPrimary: "#101010",
+		border: "#ECE8E0",
+		inputBorder: "#EFECE7",
+		inputFocusBackground: "#FFF7E5",
 		buttonDisabled: "#D7D8DE",
 		error: "#EF4444",
-		divider: "#F3F4F6",
+		divider: "#ECEBE7",
 		googleBrand: "#EA4335",
-		dot: "#EEEEEE",
+		dot: "#DDD9D1",
+		gold: "#E1AD2D",
+		coral: "#E77B51",
+		warm: "#9B5F43",
+		cardShadow: "#D7CFC0",
+		success: "#3FA26B",
+	},
+	gradients: {
+		primary: ["#E77B51", "#E1AD2D", "#E77B51"],
+		darkBackground: ["#231E28", "#0B1428", "#111717"],
+		lightBackground: ["#A3B18A", "#A3B18A60", "#FFFFFF"],
 	},
 };
 
 export const darkTheme: AppTheme = {
 	mode: "dark",
 	colors: {
-		background: "#0E0F13",
-		surface: "#181B23",
-		surfaceMuted: "#141821",
-		accentSurface: "#1E2430",
-		textPrimary: "#F4F5F7",
-		textSecondary: "#B8BCC8",
-		textMuted: "#8A8F9C",
-		primary: "#9B6BFF",
-		onPrimary: "#FFFFFF",
-		border: "#2A2D38",
-		inputBorder: "#3A3F4C",
-		inputFocusBackground: "#2B1E4B",
+		background: "#0B1428",
+		surface: "#151D31",
+		surfaceMuted: "#101A2F",
+		accentSurface: "#22283B",
+		textPrimary: "#FFFFFF",
+		textSecondary: "#A9B2C8",
+		textMuted: "#747E96",
+		primary: "#E1AD2D",
+		onPrimary: "#091226",
+		border: "#263049",
+		inputBorder: "#29334A",
+		inputFocusBackground: "#1B253D",
 		buttonDisabled: "#3F4452",
 		error: "#F87171",
-		divider: "#FEE2E2",
+		divider: "#273047",
 		googleBrand: "#EA4335",
-		dot: "#2A2D38",
+		dot: "#263049",
+		gold: "#E1AD2D",
+		coral: "#E77B51",
+		warm: "#A06246",
+		cardShadow: "#050A15",
+		success: "#36C37D",
+	},
+	gradients: {
+		primary: ["#E77B51", "#E1AD2D", "#E77B51"],
+		darkBackground: ["#231E28", "#0B1428", "#111717"],
+		lightBackground: ["#A3B18A", "#A3B18A60", "#FFFFFF"],
 	},
 };
 

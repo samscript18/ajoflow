@@ -1,5 +1,3 @@
-import { ImagePickerAsset } from "expo-image-picker";
-
 export interface RegistrationDto {
 	email: string;
 	password: string;
@@ -7,5 +5,5 @@ export interface RegistrationDto {
 	lastName: string;
 	userName: string;
 	bio?: string;
-	profileImage?: ImagePickerAsset;
+	profileImage?: string;
 }

@@ -33,7 +33,7 @@ export const useAuthStore = create<AuthState>()(
 			setUser: (user) => set({ user }),
 		}),
 		{
-			name: "auth-storage",
+			name: "authStorage",
 			storage: createJSONStorage(() => secureStorage),
 		},
 	),

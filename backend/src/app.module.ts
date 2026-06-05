@@ -9,7 +9,10 @@ import { AppService } from "./app.service";
 @Module({
 	imports: [
 		ConfigModule.forRoot({ isGlobal: true, validate: (env) => envSchema.parse(env) }),
-		ThrottlerModule.forRoot([{ name: "default", ttl: 60000, limit: 120 }]),
+		ThrottlerModule.forRoot([
+			{ name: "default", ttl: 60000, limit: 120 },
+			{ name: "authLimit", ttl: 60000, limit: 5 },
+		]),
 		ApiModule,
 	],
 	controllers: [AppController],

@@ -1,6 +1,6 @@
 import { User } from "@/types/user/user";
 import { RegistrationDto } from "./auth.interface";
-import { lightTheme } from "@/constants/theme";
+import { AppTheme } from "@/types/theme/theme";
 
 export interface AuthState {
 	registrationData: RegistrationDto;
@@ -24,6 +24,6 @@ export interface AuthState {
 
 export interface ThemeState {
 	isDark: boolean;
-	theme: typeof lightTheme;
+	theme: AppTheme;
 	toggleTheme: () => void;
 }

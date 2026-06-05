@@ -5,13 +5,24 @@
 		"scheme": "ajoflow",
 		"version": "1.0.0",
 		"orientation": "portrait",
+		"icon": "./assets/images/logo.png",
 		"userInterfaceStyle": "automatic",
 		"newArchEnabled": true,
 		"jsEngine": "hermes",
 		"ios": {
 			"supportsTablet": true,
 			"bundleIdentifier": "com.samscript.ajoflow",
+			"config": {
+				"googleSignIn": {
+					"reservedClientId": "com.googleusercontent.apps.1052450030155-ffd13eb5e1983c4mqbn913vfh1v3jebf"
+				}
+			},
 			"infoPlist": {
+				"CFBundleURLTypes": [
+					{
+						"CFBundleURLSchemes": ["com.googleusercontent.apps.1052450030155-ffd13eb5e1983c4mqbn913vfh1v3jebf"]
+					}
+				],
 				"ITSAppUsesNonExemptEncryption": false
 			}
 		},
@@ -20,7 +31,7 @@
 			"predictiveBackGestureEnabled": false,
 			"package": "com.samscript.ajoflow"
 		},
-		"plugins": ["expo-router", "expo-font", "expo-web-browser", "expo-secure-store"],
+		"plugins": ["expo-router", "expo-font", "expo-web-browser", "@react-native-google-signin/google-signin", "expo-secure-store"],
 		"experiments": {
 			"typedRoutes": true,
 			"reactCompiler": true

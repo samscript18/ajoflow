@@ -1,0 +1,43 @@
+Add beautiful reusable animations to all our availaable screens
+Onboarding images are changing fast
+
+make this button below reusable
+<TouchableOpacity
+						onPress={next}
+						activeOpacity={0.86}
+						className={`${index === 2 ? "mt-10" : "mt-6"} overflow-hidden rounded-[18px]`}
+						style={{ shadowColor: theme.colors.coral, shadowOpacity: 0.35, shadowRadius: 18, shadowOffset: { width: 0, height: 12 } }}
+					>
+						<LinearGradient colors={theme.gradients.primary} start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}>
+							<View className="h-16 flex-row items-center justify-center gap-3">
+								<Text className="font-manrope text-[17px] font-black" style={{ color: theme.colors.onPrimary }}>
+									{isLast ? "Get Started" : "Next"}
+								</Text>
+								<Ionicons name="arrow-forward" size={20} color={theme.colors.onPrimary} />
+							</View>
+						</LinearGradient>
+					</TouchableOpacity>
+
+Make theme.gradients.primary our major color so it can be used mostly
+
+update the login, forgot-password, otp, status, complete-profile screens to be a very beautiful, rich and modern fintech design using the themed color, most especial our new major color. So make sure the light and dark mode is designed
+
+Errors to fix.
+-  WARN  Some of the used filters are not yet supported on native platforms. Please check the USAGE.md for more info. Not implemented filters:
+ [
+  "FeComponentTransfer",
+  "FeConvolveMatrix",
+  "FeDiffuseLighting",
+  "FeDisplacementMap",
+  "FeFuncA",
+  "FeFuncB",
+  "FeFuncG",
+  "FeFuncR",
+  "FeImage",
+  "FeMorphology",
+  "FePointLight",
+  "FeSpecularLighting",
+  "FeSpotLight",
+  "FeTile",
+  "FeTurbulence"
+]
