@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
+import { EventEmitterModule } from "@nestjs/event-emitter";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { ApiModule } from "./api/api.module";
 import { envSchema } from "./shared/schemas/env.schema";
@@ -13,6 +14,7 @@ import { AppService } from "./app.service";
 			{ name: "default", ttl: 60000, limit: 120 },
 			{ name: "authLimit", ttl: 60000, limit: 5 },
 		]),
+		EventEmitterModule.forRoot(),
 		ApiModule,
 	],
 	controllers: [AppController],

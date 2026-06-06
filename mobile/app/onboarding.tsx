@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function Onboarding() {
 	const router = useRouter();
 	const { theme } = useThemeStore();
-	const setHasCompletedOnboarding = useAuthStore((state) => state.setHasCompletedOnboarding);
+	const { setHasCompletedOnboarding } = useAuthStore();
 	const [index, setIndex] = useState<number>(0);
 	const slide = onboardingSlides[index];
 	const isLast = index === onboardingSlides.length - 1;

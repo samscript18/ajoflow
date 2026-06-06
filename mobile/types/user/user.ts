@@ -9,6 +9,13 @@ export type User = {
 	bankName?: string;
 	accountNumber?: string;
 	isEmailVerified?: boolean;
+	expoPushTokens?: {
+		token: string;
+		platform: "ios" | "android";
+	}[];
+	preferences?: {
+		pushNotifications: boolean;
+	};
 	createdAt?: string;
 	updatedAt?: string;
 };

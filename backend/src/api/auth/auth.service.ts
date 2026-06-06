@@ -1,9 +1,12 @@
 import { BadRequestException, ConflictException, Injectable, Logger, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { EventEmitter2 } from "@nestjs/event-emitter";
+import { JwtService } from "@nestjs/jwt";
 import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
-import { createHmac } from "crypto";
-import { MailService } from "src/shared/mail/mail.service";
+import axios, { AxiosError } from "axios";
+import { EventNames } from "src/shared/enums";
+import { SendMail } from "src/shared/mail/interfaces";
 import { UtilsService } from "src/shared/services/utils.service";
 import { CompleteProfileDto, RegisterDto, StartSignupDto, VerifyEmailOtpDto } from "./dto/auth.dto";
 import { User, UserDocument } from "./schemas/user.schema";
@@ -25,9 +28,10 @@ export class AuthService {
 
 	constructor(
 		@InjectModel(User.name) private readonly users: Model<UserDocument>,
-		private readonly utils: UtilsService,
+		private readonly utilsService: UtilsService,
 		private readonly config: ConfigService,
-		private readonly mail: MailService,
+		private readonly eventEmitter: EventEmitter2,
+		private readonly jwtService: JwtService,
 	) {}
 
 	async checkExistingEmail(email: string) {
@@ -53,12 +57,12 @@ export class AuthService {
 			userName,
 			firstName: data.firstName,
 			lastName: data.lastName,
-			password: await this.utils.hashPassword(data.password),
+			password: await this.utilsService.hashPassword(data.password),
 			profileImage: data.profileImage,
 			bio: data.bio,
 		});
 
-		return { user: this.safeUser(user), token: this.signToken(user) };
+		return { user: this.utilsService.excludePassword(user), token: await this.signToken(user) };
 	}
 
 	async startSignup(data: StartSignupDto) {
@@ -67,19 +71,19 @@ export class AuthService {
 
 		if (existingUser?.isEmailVerified) throw new ConflictException("Account already exists");
 
-		const otp = this.generateOtp();
+		const { token, hashedToken } = this.utilsService.generateOtpToken();
 		const payload = {
 			email,
-			password: await this.utils.hashPassword(data.password),
+			password: await this.utilsService.hashPassword(data.password),
 			isEmailVerified: false,
-			emailOtp: this.utils.hash(otp),
+			emailOtp: hashedToken,
 			emailOtpExpires: new Date(Date.now() + 10 * 60 * 1000),
 		};
 
 		const user = existingUser ? await this.users.findByIdAndUpdate(existingUser._id, payload, { new: true }) : await this.users.create(payload);
 		if (!user) throw new BadRequestException("Unable to start signup");
 
-		await this.sendEmailOtp(user, otp);
+		await this.sendEmailOtp(user, token);
 		return { success: true, message: "Verification code sent to email" };
 	}
 
@@ -87,14 +91,14 @@ export class AuthService {
 		const user = await this.users.findOne({ email: data.email.toLowerCase() });
 		if (!user || !user.emailOtp || !user.emailOtpExpires) throw new BadRequestException("Invalid verification request");
 		if (user.emailOtpExpires.getTime() <= Date.now()) throw new BadRequestException("Verification code has expired");
-		if (user.emailOtp !== this.utils.hash(data.otp)) throw new BadRequestException("Invalid verification code");
+		if (user.emailOtp !== this.utilsService.hash(data.otp)) throw new BadRequestException("Invalid verification code");
 
 		user.isEmailVerified = true;
 		user.emailOtp = undefined;
 		user.emailOtpExpires = undefined;
 		await user.save();
 
-		return { user: this.safeUser(user), token: this.signToken(user) };
+		return { user: this.utilsService.excludePassword(user), token: await this.signToken(user) };
 	}
 
 	async resendEmailOtp(email: string) {
@@ -102,11 +106,11 @@ export class AuthService {
 		if (!user) throw new BadRequestException("Account not found");
 		if (user.isEmailVerified) return { success: true, message: "Email already verified" };
 
-		const otp = this.generateOtp();
-		user.emailOtp = this.utils.hash(otp);
+		const { token, hashedToken } = this.utilsService.generateOtpToken();
+		user.emailOtp = hashedToken;
 		user.emailOtpExpires = new Date(Date.now() + 10 * 60 * 1000);
 		await user.save();
-		await this.sendEmailOtp(user, otp);
+		await this.sendEmailOtp(user, token);
 		return { success: true, message: "Verification code resent" };
 	}
 
@@ -130,7 +134,7 @@ export class AuthService {
 		user.accountNumber = data.accountNumber;
 		await user.save();
 
-		return { user: this.safeUser(user), token: this.signToken(user) };
+		return { user: this.utilsService.excludePassword(user), token: await this.signToken(user) };
 	}
 
 	async login(email: string, password: string) {
@@ -142,7 +146,7 @@ export class AuthService {
 			throw new BadRequestException("Account temporarily locked. Try later.");
 		}
 
-		const { isValid } = await this.utils.comparePasswords(password, user.password);
+		const { isValid } = await this.utilsService.comparePasswords(password, user.password);
 		if (!isValid) {
 			user.loginAttempts = (user.loginAttempts ?? 0) + 1;
 			if (user.loginAttempts >= 5) {
@@ -156,7 +160,7 @@ export class AuthService {
 		user.loginAttempts = 0;
 		user.loginBlockedUntil = undefined;
 		await user.save();
-		return { user: this.safeUser(user), token: this.signToken(user) };
+		return { user: this.utilsService.excludePassword(user), token: await this.signToken(user) };
 	}
 
 	async googleAuth(idToken: string) {
@@ -182,15 +186,15 @@ export class AuthService {
 			await user.save();
 		}
 
-		return { user: this.safeUser(user), token: this.signToken(user) };
+		return { user: this.utilsService.excludePassword(user), token: await this.signToken(user) };
 	}
 
 	async forgotPassword(email: string) {
 		const user = await this.users.findOne({ email: email.toLowerCase() });
 		if (!user) return { success: true, message: "Password reset code has been sent to email" };
 
-		const token = this.generateOtp();
-		user.resetPasswordToken = this.utils.hash(token);
+		const { token, hashedToken } = this.utilsService.generateOtpToken();
+		user.resetPasswordToken = hashedToken;
 		user.resetPasswordExpires = new Date(Date.now() + 10 * 60 * 1000);
 		await user.save();
 
@@ -204,19 +208,19 @@ export class AuthService {
 			throw new BadRequestException("Invalid verification request");
 		}
 		if (user.resetPasswordExpires.getTime() <= Date.now()) throw new BadRequestException("Reset code has expired");
-		if (user.resetPasswordToken !== this.utils.hash(otp)) throw new BadRequestException("Invalid reset code");
+		if (user.resetPasswordToken !== this.utilsService.hash(otp)) throw new BadRequestException("Invalid reset code");
 
 		return { success: true, message: "Reset code verified" };
 	}
 
 	async resetPassword(token: string, password: string) {
-		const hashedToken = this.utils.hash(token);
+		const hashedToken = this.utilsService.hash(token);
 		const user = await this.users.findOne({ resetPasswordToken: hashedToken });
 		if (!user || !user.resetPasswordExpires || user.resetPasswordExpires.getTime() <= Date.now()) {
 			throw new BadRequestException("Invalid or expired token");
 		}
 
-		user.password = await this.utils.hashPassword(password);
+		user.password = await this.utilsService.hashPassword(password);
 		user.resetPasswordToken = undefined;
 		user.resetPasswordExpires = undefined;
 		await user.save();
@@ -224,9 +228,17 @@ export class AuthService {
 	}
 
 	private async verifyGoogleToken(idToken: string): Promise<GoogleTokenInfo> {
-		const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(idToken)}`);
-		const tokenInfo = (await response.json()) as GoogleTokenInfo;
-		if (!response.ok) throw new BadRequestException(tokenInfo.error_description ?? "Google authentication failed");
+		let tokenInfo: GoogleTokenInfo;
+
+		try {
+			const response = await axios.get<GoogleTokenInfo>("https://oauth2.googleapis.com/tokeninfo", {
+				params: { id_token: idToken },
+			});
+			tokenInfo = response.data;
+		} catch (error) {
+			const axiosError = error as AxiosError<GoogleTokenInfo>;
+			throw new BadRequestException(axiosError.response?.data?.error_description ?? "Google authentication failed");
+		}
 
 		const expectedAudience = this.config.get<string>("GOOGLE_WEB_CLIENT_ID") || this.config.get<string>("GOOGLE_CLIENT_ID");
 		if (expectedAudience && tokenInfo.aud !== expectedAudience) {
@@ -238,30 +250,46 @@ export class AuthService {
 
 	private async sendResetEmail(user: UserDocument, token: string) {
 		try {
-			const subject = "Reset your AjoFlow password";
-			const html = `<p>Hello ${user.firstName || "there"},</p><p>We received a request to reset your AjoFlow password.</p><p>Your reset code is:</p><h2>${token}</h2><p>This code expires in 10 minutes.</p>`;
-			await this.mail.sendMail({ to: user.email, subject, html });
-		} catch (error) {
+			const mail: SendMail = {
+				to: user.email,
+				subject: "Reset your AjoFlow password",
+				template: "password-reset-otp",
+				context: {
+					name: user.firstName || "there",
+					code: token,
+					expiresIn: "10 minutes",
+					supportEmail: this.config.get<string>("MAILER_USER"),
+					year: new Date().getFullYear(),
+				},
+			};
+			this.eventEmitter.emit(EventNames.SendMail, mail);
+		} catch {
 			this.logger.warn(`Password reset email failed: ${user.email}`);
 		}
 	}
 
 	private async sendEmailOtp(user: UserDocument, otp: string) {
 		try {
-			const subject = "Verify your AjoFlow email";
-			const html = `<p>Hello,</p><p>Your AjoFlow verification code is:</p><h2>${otp}</h2><p>This code expires in 10 minutes.</p>`;
-			await this.mail.sendMail({ to: user.email, subject, html });
-		} catch (error) {
+			const mail: SendMail = {
+				to: user.email,
+				subject: "Verify your AjoFlow account",
+				template: "email-verification-otp",
+				context: {
+					name: user.firstName || "there",
+					code: otp,
+					expiresIn: "10 minutes",
+					supportEmail: this.config.get<string>("SUPPORT_EMAIL") || "support@ajoflow.com",
+					year: new Date().getFullYear(),
+				},
+			};
+			this.eventEmitter.emit(EventNames.SendMail, mail);
+		} catch {
 			this.logger.warn(`Email verification OTP failed: ${user.email}`);
 		}
 	}
 
-	private generateOtp() {
-		return `${Math.floor(100000 + Math.random() * 900000)}`;
-	}
-
 	private async uniqueUsername(email: string, name: string) {
-		const base = this.utils.slug(name || email.split("@")[0] || "user").replace(/-/g, "_") || "user";
+		const base = this.utilsService.slug(name || email.split("@")[0] || "user").replace(/-/g, "_") || "user";
 		let candidate = base.slice(0, 20);
 		let attempt = 0;
 
@@ -292,33 +320,12 @@ export class AuthService {
 		return suggestions;
 	}
 
-	private signToken(user: UserDocument) {
-		const secret = this.config.get<string>("JWT_ACCESS_SECRET") || this.config.get<string>("JWT_SECRET") || "development-secret";
-		const header = this.base64Url(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-		const payload = this.base64Url(JSON.stringify({ sub: user._id.toString(), email: user.email, iat: Math.floor(Date.now() / 1000) }));
-		const signature = this.base64Url(createHmac("sha256", secret).update(`${header}.${payload}`).digest());
-		return `${header}.${payload}.${signature}`;
-	}
-
-	private base64Url(value: string | Buffer) {
-		return Buffer.from(value).toString("base64url");
-	}
-
-	private safeUser(user: UserDocument) {
-		return {
-			_id: user._id.toString(),
-			id: user._id.toString(),
+	private async signToken(user: UserDocument) {
+		const token = await this.jwtService.signAsync({
+			sub: user._id.toString(),
 			email: user.email,
-			firstName: user.firstName,
-			lastName: user.lastName,
-			userName: user.userName,
-			profileImage: user.profileImage,
-			bio: user.bio,
-			bankName: user.bankName,
-			accountNumber: user.accountNumber,
-			isEmailVerified: user.isEmailVerified,
-			createdAt: user.createdAt,
-			updatedAt: user.updatedAt,
-		};
+			id: user._id.toString(),
+		});
+		return token;
 	}
 }

@@ -1,14 +1,9 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
-import { HydratedDocument, Types } from "mongoose";
-
-export type UserDocument = HydratedDocument<User>;
+import { HydratedDocument } from "mongoose";
+import { ExpoPushToken } from "src/api/notification/interfaces/notification.interface";
 
 @Schema({ timestamps: true })
 export class User {
-	_id: Types.ObjectId;
-	createdAt?: Date;
-	updatedAt?: Date;
-
 	@Prop({ trim: true })
 	firstName: string;
 
@@ -59,6 +54,29 @@ export class User {
 
 	@Prop()
 	loginBlockedUntil?: Date;
+
+	@Prop({
+		type: [
+			{
+				token: { type: String, required: true },
+				platform: { type: String, enum: ["ios", "android"], required: true },
+			},
+		],
+		default: [],
+	})
+	expoPushTokens?: ExpoPushToken[];
+
+	@Prop({
+		type: {
+			pushNotifications: { type: Boolean, default: true },
+		},
+		default: { pushNotifications: true },
+	})
+	preferences?: {
+		pushNotifications: boolean;
+	};
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+UserSchema.index({ "expoPushTokens.token": 1 });
+export type UserDocument = HydratedDocument<User>;

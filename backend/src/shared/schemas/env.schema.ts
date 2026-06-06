@@ -12,12 +12,12 @@ export const envSchema = z
 		JWT_REFRESH_EXPIRES_IN: z.string().default("7d"),
 		FRONTEND_URL: z.string().optional(),
 		ALLOWED_ORIGINS: z.string().optional(),
-		SMTP_HOST: z.string().optional(),
-		SMTP_PORT: z.coerce.number().optional(),
-		SMTP_USER: z.string().optional(),
-		SMTP_PASS: z.string().optional(),
+		MAILER_HOST: z.string().optional(),
+		MAILER_PORT: z.coerce.number().optional(),
+		MAILER_USER: z.string().optional(),
+		MAILER_PASS: z.string().optional(),
 		SMTP_FROM: z.string().optional(),
-		ESCALATION_EMAIL_FROM: z.string().optional(),
+		MAILER_FROM_EMAIL: z.string().optional(),
 		CLOUDINARY_CLOUD_NAME: z.string().optional(),
 		CLOUDINARY_API_KEY: z.string().optional(),
 		CLOUDINARY_API_SECRET: z.string().optional(),
@@ -44,13 +44,14 @@ export const envSchema = z
 			}
 		}
 
-		const smtpValues = [env.SMTP_HOST, env.SMTP_PORT, env.SMTP_USER, env.SMTP_PASS].filter(Boolean);
+		const smtpValues = [env.MAILER_HOST, env.MAILER_PORT, env.MAILER_USER, env.MAILER_PASS].filter(Boolean);
 		if (smtpValues.length > 0 && smtpValues.length < 4) {
-			ctx.addIssue({ code: z.ZodIssueCode.custom, message: "SMTP_HOST, SMTP_PORT, SMTP_USER, and SMTP_PASS must be provided together" });
+			ctx.addIssue({ code: z.ZodIssueCode.custom, message: "MAILER_HOST, MAILER_PORT, MAILER_USER, and MAILER_PASS must be provided together" });
 		}
 
 		const cloudinaryValues = [env.CLOUDINARY_CLOUD_NAME, env.CLOUDINARY_API_KEY, env.CLOUDINARY_API_SECRET].filter(Boolean);
 		if (cloudinaryValues.length > 0 && cloudinaryValues.length < 3) {
 			ctx.addIssue({ code: z.ZodIssueCode.custom, message: "CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET must be provided together" });
 		}
+
 	});

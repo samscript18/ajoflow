@@ -1,40 +1,55 @@
 {
-	"expo": {
-		"name": "AjoFlow",
-		"slug": "ajoflow",
-		"scheme": "ajoflow",
-		"version": "1.0.0",
-		"orientation": "portrait",
-		"icon": "./assets/images/logo.png",
-		"userInterfaceStyle": "automatic",
-		"newArchEnabled": true,
-		"jsEngine": "hermes",
-		"ios": {
-			"supportsTablet": true,
-			"bundleIdentifier": "com.samscript.ajoflow",
-			"config": {
-				"googleSignIn": {
-					"reservedClientId": "com.googleusercontent.apps.1052450030155-ffd13eb5e1983c4mqbn913vfh1v3jebf"
-				}
-			},
-			"infoPlist": {
-				"CFBundleURLTypes": [
-					{
-						"CFBundleURLSchemes": ["com.googleusercontent.apps.1052450030155-ffd13eb5e1983c4mqbn913vfh1v3jebf"]
-					}
-				],
-				"ITSAppUsesNonExemptEncryption": false
-			}
-		},
-		"android": {
-			"edgeToEdgeEnabled": true,
-			"predictiveBackGestureEnabled": false,
-			"package": "com.samscript.ajoflow"
-		},
-		"plugins": ["expo-router", "expo-font", "expo-web-browser", "@react-native-google-signin/google-signin", "expo-secure-store"],
-		"experiments": {
-			"typedRoutes": true,
-			"reactCompiler": true
-		}
-	}
+  "expo": {
+    "name": "AjoFlow",
+    "slug": "ajoflow",
+    "scheme": "ajoflow",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/logo.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "jsEngine": "hermes",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.samscript.ajoflow",
+      "config": {
+        "googleSignIn": {
+          "reservedClientId": "com.googleusercontent.apps.1052450030155-ffd13eb5e1983c4mqbn913vfh1v3jebf"
+        }
+      },
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.1052450030155-ffd13eb5e1983c4mqbn913vfh1v3jebf"
+            ]
+          }
+        ],
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.samscript.ajoflow"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-web-browser",
+      "@react-native-google-signin/google-signin",
+      "expo-secure-store"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "dc17e301-3d78-48d1-bc4e-0ad160a2c9a8"
+      }
+    },
+    "owner": "samscript18"
+  }
 }

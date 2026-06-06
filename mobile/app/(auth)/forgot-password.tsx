@@ -114,12 +114,7 @@ export default function ForgotPassword() {
 	};
 
 	const title = step === "email" ? "Forgot password?" : step === "otp" ? "Enter reset code" : "Create new password";
-	const description =
-		step === "email"
-			? "Enter your email address and we'll send you a code to reset your password."
-			: step === "otp"
-				? `We sent a 6-digit code to ${resetEmail}.`
-				: "Choose a strong password you have not used before.";
+	const description = step === "email" ? "Enter your email address and we'll send you a code to reset your password." : step === "otp" ? `We sent a 6-digit code to ${resetEmail}.` : "Choose a strong password you have not used before.";
 
 	return (
 		<LinearGradient colors={isDark ? theme.gradients.darkBackground : theme.gradients.lightBackground} style={{ flex: 1 }}>
@@ -128,11 +123,15 @@ export default function ForgotPassword() {
 					<KeyboardAvoidingView className="flex-1" behavior={Platform.OS === "ios" ? "padding" : undefined}>
 						<AnimatedScreen>
 							<View className="flex-row items-center justify-between">
-								<TouchableOpacity onPress={() => (step === "email" ? router.back() : setStep(step === "password" ? "otp" : "email"))} className="h-11 w-11 items-center justify-center rounded-full" style={{ backgroundColor: theme.colors.surface }}>
+								<TouchableOpacity
+									onPress={() => (step === "email" ? router.back() : setStep(step === "password" ? "otp" : "email"))}
+									className="h-11 w-11 items-center justify-center rounded-full"
+									style={{ backgroundColor: theme.colors.surface }}
+								>
 									<Ionicons name="chevron-back" size={22} color={theme.colors.textPrimary} />
 								</TouchableOpacity>
 								<View className="flex-row items-center gap-2">
-									<Logo size={34} />
+									<Logo size={45} />
 									<Text className="font-manrope text-xl font-extrabold" style={{ color: theme.colors.textPrimary }}>
 										AjoFlow
 									</Text>
@@ -167,7 +166,18 @@ export default function ForgotPassword() {
 													control={emailForm.control}
 													name="email"
 													render={({ field: { value, onChange, onBlur } }) => (
-														<View className="h-[58px] flex-row items-center rounded-2xl px-5" style={{ backgroundColor: theme.colors.surfaceMuted, borderWidth: 1, borderColor: emailForm.formState.errors.email ? theme.colors.error : focused === "email" ? theme.colors.primary : theme.colors.inputBorder }}>
+														<View
+															className="h-[58px] flex-row items-center rounded-2xl px-5"
+															style={{
+																backgroundColor: theme.colors.surfaceMuted,
+																borderWidth: 1,
+																borderColor: emailForm.formState.errors.email
+																	? theme.colors.error
+																	: focused === "email"
+																		? theme.colors.primary
+																		: theme.colors.inputBorder,
+															}}
+														>
 															<TextInput
 																value={value}
 																onChangeText={onChange}
@@ -184,7 +194,11 @@ export default function ForgotPassword() {
 																className="flex-1 font-manrope text-base font-semibold"
 																style={{ color: theme.colors.textPrimary }}
 															/>
-															<Ionicons name={emailForm.formState.errors.email ? "close-circle" : "mail-outline"} size={21} color={emailForm.formState.errors.email ? theme.colors.error : theme.colors.textMuted} />
+															<Ionicons
+																name={emailForm.formState.errors.email ? "close-circle" : "mail-outline"}
+																size={21}
+																color={emailForm.formState.errors.email ? theme.colors.error : theme.colors.textMuted}
+															/>
 														</View>
 													)}
 												/>
@@ -195,7 +209,14 @@ export default function ForgotPassword() {
 												)}
 											</View>
 
-											<GradientButton onPress={emailForm.handleSubmit(submitEmail)} loading={requestMutation.isPending} label="Send Reset Code" contentClassName="h-[58px]" className="mt-7" icon="mail" />
+											<GradientButton
+												onPress={emailForm.handleSubmit(submitEmail)}
+												loading={requestMutation.isPending}
+												label="Send Reset Code"
+												contentClassName="h-[58px]"
+												className="mt-7"
+												icon="mail"
+											/>
 										</>
 									)}
 
@@ -213,7 +234,12 @@ export default function ForgotPassword() {
 														keyboardType="number-pad"
 														maxLength={1}
 														className="h-[56px] w-[48px] rounded-2xl text-center font-manrope text-xl font-extrabold"
-														style={{ backgroundColor: theme.colors.surfaceMuted, color: theme.colors.textPrimary, borderWidth: 1, borderColor: theme.colors.inputBorder }}
+														style={{
+															backgroundColor: theme.colors.surfaceMuted,
+															color: theme.colors.textPrimary,
+															borderWidth: 1,
+															borderColor: theme.colors.inputBorder,
+														}}
 													/>
 												))}
 											</View>
@@ -233,8 +259,24 @@ export default function ForgotPassword() {
 
 									{step === "password" && (
 										<>
-											<PasswordInput control={passwordForm.control} name="password" label="New password" focused={focused} setFocused={setFocused} show={showPassword} setShow={setShowPassword} />
-											<PasswordInput control={passwordForm.control} name="confirmPassword" label="Confirm password" focused={focused} setFocused={setFocused} show={showConfirmPassword} setShow={setShowConfirmPassword} />
+											<PasswordInput
+												control={passwordForm.control}
+												name="password"
+												label="New password"
+												focused={focused}
+												setFocused={setFocused}
+												show={showPassword}
+												setShow={setShowPassword}
+											/>
+											<PasswordInput
+												control={passwordForm.control}
+												name="confirmPassword"
+												label="Confirm password"
+												focused={focused}
+												setFocused={setFocused}
+												show={showConfirmPassword}
+												setShow={setShowConfirmPassword}
+											/>
 											{passwordForm.formState.errors.password?.message && (
 												<Text className="mt-2 font-manrope text-xs font-semibold" style={{ color: theme.colors.error }}>
 													{passwordForm.formState.errors.password.message}
@@ -245,7 +287,14 @@ export default function ForgotPassword() {
 													{passwordForm.formState.errors.confirmPassword.message}
 												</Text>
 											)}
-											<GradientButton onPress={passwordForm.handleSubmit(submitPassword)} loading={resetMutation.isPending} label="Reset Password" contentClassName="h-[58px]" className="mt-7" icon="lock-closed" />
+											<GradientButton
+												onPress={passwordForm.handleSubmit(submitPassword)}
+												loading={resetMutation.isPending}
+												label="Reset Password"
+												contentClassName="h-[58px]"
+												className="mt-7"
+												icon="lock-closed"
+											/>
 										</>
 									)}
 
@@ -267,7 +316,23 @@ export default function ForgotPassword() {
 	);
 }
 
-function PasswordInput({ control, name, label, focused, setFocused, show, setShow }: { control: ReturnType<typeof useForm<ResetPasswordForm>>["control"]; name: "password" | "confirmPassword"; label: string; focused: string; setFocused: (value: string) => void; show: boolean; setShow: (value: boolean) => void }) {
+function PasswordInput({
+	control,
+	name,
+	label,
+	focused,
+	setFocused,
+	show,
+	setShow,
+}: {
+	control: ReturnType<typeof useForm<ResetPasswordForm>>["control"];
+	name: "password" | "confirmPassword";
+	label: string;
+	focused: string;
+	setFocused: (value: string) => void;
+	show: boolean;
+	setShow: (value: boolean) => void;
+}) {
 	const { theme } = useThemeStore();
 
 	return (
@@ -279,7 +344,14 @@ function PasswordInput({ control, name, label, focused, setFocused, show, setSho
 				control={control}
 				name={name}
 				render={({ field: { value, onChange, onBlur }, fieldState }) => (
-					<View className="h-[58px] flex-row items-center rounded-2xl px-5" style={{ backgroundColor: theme.colors.surfaceMuted, borderWidth: 1, borderColor: fieldState.error ? theme.colors.error : focused === name ? theme.colors.primary : theme.colors.inputBorder }}>
+					<View
+						className="h-[58px] flex-row items-center rounded-2xl px-5"
+						style={{
+							backgroundColor: theme.colors.surfaceMuted,
+							borderWidth: 1,
+							borderColor: fieldState.error ? theme.colors.error : focused === name ? theme.colors.primary : theme.colors.inputBorder,
+						}}
+					>
 						<TextInput
 							value={value}
 							onChangeText={onChange}

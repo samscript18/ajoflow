@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { createHash, randomBytes } from "crypto";
+import { createHash, randomBytes, randomInt } from "crypto";
 import slugify from "slugify";
 import * as bcrypt from "bcrypt";
 
@@ -13,6 +13,13 @@ export class UtilsService {
 		return createHash("sha256").update(value).digest("hex");
 	}
 
+	generateOtpToken() {
+		const token = randomInt(0, 1000000).toString().padStart(6, "0");
+		const hashedToken = this.hash(token);
+
+		return { token, hashedToken };
+	}
+
 	async hashPassword(password: string): Promise<string> {
 		const saltFactor = await bcrypt.genSalt(12);
 		return bcrypt.hash(password, saltFactor);
@@ -23,18 +30,13 @@ export class UtilsService {
 		return { isValid: validity };
 	}
 
-	apiKey() {
-		const raw = `rx_live_${randomBytes(32).toString("hex")}`;
-		return { raw, hash: this.hash(raw), preview: `${raw.slice(0, 12)}...${raw.slice(-6)}` };
+	excludePassword<T extends { password?: string | null }>(user: T): Omit<T, "password"> {
+		delete user.password;
+
+		return user as Omit<T, "password">;
 	}
 
 	token(length = 32) {
 		return randomBytes(length).toString("hex");
-	}
-
-	reference(prefix = "RX") {
-		const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-		const suffix = Math.floor(100000 + Math.random() * 900000);
-		return `${prefix}-${date}-${suffix}`;
 	}
 }

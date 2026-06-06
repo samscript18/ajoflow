@@ -65,82 +65,87 @@ export default function OtpVerification() {
 		<LinearGradient colors={isDark ? theme.gradients.darkBackground : theme.gradients.lightBackground} style={{ flex: 1 }}>
 			<SafeAreaView className="flex-1 px-7 pt-5">
 				<AnimatedScreen>
-				<View className="flex-row items-center justify-between">
-					<TouchableOpacity onPress={() => router.back()} className="h-[42px] w-[42px] items-center justify-center rounded-full" style={{ backgroundColor: theme.colors.surface }}>
-						<Ionicons name="chevron-back" size={22} color={theme.colors.textPrimary} />
-					</TouchableOpacity>
-					<View className="flex-row items-center gap-[9px]">
-						<Logo size={34} />
-						<Text className="font-manrope text-[19px] font-black" style={{ color: theme.colors.textPrimary }}>
-							AjoFlow
-						</Text>
-					</View>
-					<View className="h-[42px] w-[42px]" />
-				</View>
-
-				<AnimatedSection delay={120} className="h-72 items-center justify-center">
-					<View
-						className="absolute left-0 top-[34px] z-10 h-16 w-[124px] flex-row items-center gap-2.5 rounded-[18px] px-3.5"
-						style={{ backgroundColor: theme.colors.surface, shadowColor: "#000000", shadowOpacity: 0.08, shadowRadius: 18, shadowOffset: { width: 0, height: 10 } }}
-					>
-						<View className="h-[34px] w-[34px] items-center justify-center rounded-full" style={{ backgroundColor: theme.colors.accentSurface }}>
-							<Ionicons name="leaf" size={16} color={theme.colors.success} />
-						</View>
-						<View>
-							<Text className="font-manrope text-[10px] font-bold" style={{ color: theme.colors.textMuted }}>
-								Status
-							</Text>
-							<Text className="font-manrope text-[13px] font-black" style={{ color: theme.colors.textPrimary }}>
-								Secured
-							</Text>
-						</View>
-					</View>
-					<RemoteArtwork uri="https://res.cloudinary.com/dynopc0cn/image/upload/v1780677746/Container_2_szgvux.svg" width={260} height={260} />
-				</AnimatedSection>
-
-				<KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1 justify-end">
-					<AnimatedSection delay={220} className="-mb-12">
-					<View className="-mx-7 rounded-t-[34px] px-[31px] pb-[82px] pt-[38px]" style={{ backgroundColor: theme.colors.surface }}>
-						<Text className="font-manrope text-[30px] font-extrabold leading-9" style={{ color: theme.colors.textPrimary }}>
-							Verify your email
-						</Text>
-						<Text className="font-manrope mt-2 text-base leading-6" style={{ color: theme.colors.textSecondary }}>
-							{"We've sent a 6-digit code to "}
-							<Text className="font-bold" style={{ color: theme.colors.textPrimary }}>
-								{registrationData.email || "your email"}
-							</Text>
-						</Text>
-
-						<View className="mt-8 flex-row justify-between">
-							{code.map((digit, index) => (
-								<TextInput
-									key={index}
-									ref={(node) => {
-										inputs.current[index] = node;
-									}}
-									value={digit}
-									onChangeText={(value) => setDigit(value, index)}
-									keyboardType="number-pad"
-									maxLength={1}
-									className="h-[56px] w-[48px] rounded-2xl text-center font-manrope text-xl font-extrabold"
-									style={{ backgroundColor: theme.colors.surfaceMuted, color: theme.colors.textPrimary, borderWidth: 1, borderColor: theme.colors.inputBorder }}
-								/>
-							))}
-						</View>
-
-						<TouchableOpacity className="mt-8 items-center" onPress={() => resendMutation.mutate({ email: registrationData.email })} disabled={resendMutation.isPending}>
-							<Text className="font-manrope text-sm" style={{ color: theme.colors.textSecondary }}>
-								{"Didn't receive a code? "}
-								<Text className="font-bold" style={{ color: theme.colors.warm }}>
-									{resendMutation.isPending ? "Sending..." : "Resend Code"}
-								</Text>
-							</Text>
+					<View className="flex-row items-center justify-between">
+						<TouchableOpacity onPress={() => router.back()} className="h-[42px] w-[42px] items-center justify-center rounded-full" style={{ backgroundColor: theme.colors.surface }}>
+							<Ionicons name="chevron-back" size={22} color={theme.colors.textPrimary} />
 						</TouchableOpacity>
-
-						<GradientButton onPress={verify} loading={verifyMutation.isPending} label="Verify & Proceed" contentClassName="h-[58px]" className="mt-7" />
+						<View className="flex-row items-center gap-[9px]">
+							<Logo size={45} />
+							<Text className="font-manrope text-[19px] font-black" style={{ color: theme.colors.textPrimary }}>
+								AjoFlow
+							</Text>
+						</View>
+						<View className="h-[42px] w-[42px]" />
 					</View>
+
+					<AnimatedSection delay={120} className="h-72 items-center justify-center">
+						<View
+							className="absolute left-0 top-[34px] z-10 h-16 w-[124px] flex-row items-center gap-2.5 rounded-[18px] px-3.5"
+							style={{ backgroundColor: theme.colors.surface, shadowColor: "#000000", shadowOpacity: 0.08, shadowRadius: 18, shadowOffset: { width: 0, height: 10 } }}
+						>
+							<View className="h-[34px] w-[34px] items-center justify-center rounded-full" style={{ backgroundColor: theme.colors.accentSurface }}>
+								<Ionicons name="leaf" size={16} color={theme.colors.success} />
+							</View>
+							<View>
+								<Text className="font-manrope text-[10px] font-bold" style={{ color: theme.colors.textMuted }}>
+									Status
+								</Text>
+								<Text className="font-manrope text-[13px] font-black" style={{ color: theme.colors.textPrimary }}>
+									Secured
+								</Text>
+							</View>
+						</View>
+						<RemoteArtwork uri="https://res.cloudinary.com/dynopc0cn/image/upload/v1780677746/Container_2_szgvux.svg" width={260} height={260} />
 					</AnimatedSection>
-				</KeyboardAvoidingView>
+
+					<KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1 justify-end">
+						<AnimatedSection delay={220} className="-mb-12">
+							<View className="-mx-7 rounded-t-[34px] px-[31px] pb-[82px] pt-[38px]" style={{ backgroundColor: theme.colors.surface }}>
+								<Text className="font-manrope text-[30px] font-extrabold leading-9" style={{ color: theme.colors.textPrimary }}>
+									Verify your email
+								</Text>
+								<Text className="font-manrope mt-2 text-base leading-6" style={{ color: theme.colors.textSecondary }}>
+									{"We've sent a 6-digit code to "}
+									<Text className="font-bold" style={{ color: theme.colors.textPrimary }}>
+										{registrationData.email || "your email"}
+									</Text>
+								</Text>
+
+								<View className="mt-8 flex-row justify-between">
+									{code.map((digit, index) => (
+										<TextInput
+											key={index}
+											ref={(node) => {
+												inputs.current[index] = node;
+											}}
+											value={digit}
+											onChangeText={(value) => setDigit(value, index)}
+											keyboardType="number-pad"
+											maxLength={1}
+											className="h-[56px] w-[48px] rounded-2xl text-center font-manrope text-xl font-extrabold"
+											style={{
+												backgroundColor: theme.colors.surfaceMuted,
+												color: theme.colors.textPrimary,
+												borderWidth: 1,
+												borderColor: theme.colors.inputBorder,
+											}}
+										/>
+									))}
+								</View>
+
+								<TouchableOpacity className="mt-8 items-center" onPress={() => resendMutation.mutate({ email: registrationData.email })} disabled={resendMutation.isPending}>
+									<Text className="font-manrope text-sm" style={{ color: theme.colors.textSecondary }}>
+										{"Didn't receive a code? "}
+										<Text className="font-bold" style={{ color: theme.colors.warm }}>
+											{resendMutation.isPending ? "Sending..." : "Resend Code"}
+										</Text>
+									</Text>
+								</TouchableOpacity>
+
+								<GradientButton onPress={verify} loading={verifyMutation.isPending} label="Verify & Proceed" contentClassName="h-[58px]" className="mt-7" />
+							</View>
+						</AnimatedSection>
+					</KeyboardAvoidingView>
 				</AnimatedScreen>
 			</SafeAreaView>
 		</LinearGradient>

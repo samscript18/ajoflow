@@ -151,7 +151,7 @@ export default function Login() {
 										<Ionicons name="chevron-back" size={22} color={theme.colors.textPrimary} />
 									</TouchableOpacity>
 									<View className="flex-row items-center gap-[9px]">
-										<Logo size={34} />
+										<Logo size={45} />
 										<Text className="font-manrope text-[19px] font-black" style={{ color: theme.colors.textPrimary }}>
 											AjoFlow
 										</Text>

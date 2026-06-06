@@ -136,7 +136,7 @@ export class IsBase64MediaConstraint implements ValidatorConstraintInterface {
 export function IsBase64MediaArray(validationOptions?: ValidationOptions) {
 	const validatorInstance = new IsBase64MediaConstraint();
 
-	return function (object: Object, propertyName: string) {
+	return function (object: object, propertyName: string) {
 		registerDecorator({
 			name: "isBase64MediaArray",
 			target: object.constructor,

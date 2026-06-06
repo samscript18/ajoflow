@@ -1,51 +1,40 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import nodemailer from "nodemailer";
+import { BadRequestException, Injectable, Logger } from "@nestjs/common";
+import { MailerService } from "@nestjs-modules/mailer";
 import { SendMail } from "./interfaces";
+import { ConfigService } from "@nestjs/config";
+import { OnEvent } from "@nestjs/event-emitter";
+import { EventNames } from "../enums";
 
 @Injectable()
 export class MailService {
-	private readonly logger = new Logger(MailService.name);
+	private readonly logger: Logger;
 
-	constructor(private readonly config: ConfigService) {}
+	constructor(
+		private readonly mailerService: MailerService,
+		private readonly configService: ConfigService,
+	) {
+		this.logger = new Logger(MailService.name);
+	}
 
 	async sendMail(dto: SendMail) {
-		return this.send(dto.to, dto.subject, dto.html ?? this.renderTemplate(dto.template, dto.context));
-	}
-
-	async send(to: string, subject: string, html: string) {
-		const host = this.config.get<string>("SMTP_HOST");
-		const port = this.config.get<number>("SMTP_PORT");
-		const user = this.config.get<string>("SMTP_USER");
-		const pass = this.config.get<string>("SMTP_PASS");
-		const from = this.config.get<string>("SMTP_FROM") || this.config.get<string>("ESCALATION_EMAIL_FROM") || user;
-
-		if (!host || !port || !user || !pass || !from) {
-			this.logger.log(`Email skipped (Missing SMTP Credentials): ${subject} -> ${to}`);
-			return { skipped: true };
-		}
-
-		const transporter = nodemailer.createTransport({
-			host,
-			port,
-			secure: port === 465,
-			auth: { user, pass },
-		});
-
+		const { to, template, context, subject } = dto;
 		try {
-			const info = await transporter.sendMail({ from, to, subject, html });
-
-			this.logger.log(`Email successfully sent to ${to}`);
-			return info;
+			await this.mailerService.sendMail({
+				from: this.configService.get<string>("MAILER_FROM_EMAIL") || this.configService.get<string>("SMTP_FROM"),
+				to,
+				subject,
+				template,
+				context,
+			});
 		} catch (error) {
-			this.logger.error(`Failed to send email to ${to}`, error instanceof Error ? error.stack : error);
-			throw error;
+			throw new BadRequestException(error);
 		}
 	}
 
-	private renderTemplate(template?: string, context: SendMail["context"] = {}) {
-		if (!template) return "";
-
-		return Object.entries(context).reduce((html, [key, value]) => html.replaceAll(`{{${key}}}`, String(value ?? "")), template);
+	@OnEvent(EventNames.SendMail)
+	async sendMailListener(payload: SendMail) {
+		this.logger.log("sendMailListener triggered");
+		await this.sendMail(payload);
+		this.logger.log("sendMailListener completed");
 	}
 }

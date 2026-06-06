@@ -24,7 +24,7 @@ export const useThemeStore = create<ThemeState>()(
 				}),
 		}),
 		{
-			name: "themeStorage",
+			name: "theme-storage",
 			storage: createJSONStorage(() => secureStorage),
 			merge: (persistedState, currentState) => {
 				const persisted = persistedState as Partial<ThemeState> | undefined;
