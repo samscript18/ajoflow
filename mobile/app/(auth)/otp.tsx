@@ -2,6 +2,7 @@ import Logo from "@/components/ui/logo";
 import { AnimatedScreen, AnimatedSection } from "@/components/ui/animated-screen";
 import GradientButton from "@/components/ui/gradient-button";
 import RemoteArtwork from "@/components/ui/remote-artwork";
+import { useResendCooldown } from "@/hooks/useResendCooldown";
 import { resendEmailOtp, verifyEmailOtp } from "@/lib/services/auth.service";
 import { otpSchema } from "@/schemas/auth.schema";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -10,16 +11,17 @@ import { Ionicons } from "@expo/vector-icons";
 import { useMutation } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert, KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function OtpVerification() {
 	const router = useRouter();
 	const { theme, isDark } = useThemeStore();
-	const { registrationData, setAccessToken, setUser } = useAuthStore();
+	const { registrationData, setAccessToken, setUser, user } = useAuthStore();
 	const [code, setCode] = useState<string[]>(["", "", "", "", "", ""]);
 	const inputs = useRef<(TextInput | null)[]>([]);
+	const { formattedTime, isCoolingDown, startCooldown } = useResendCooldown();
 
 	const verifyMutation = useMutation({
 		mutationKey: ["auth", "verify-email-otp"],
@@ -27,18 +29,29 @@ export default function OtpVerification() {
 		onSuccess: (data) => {
 			setAccessToken(data.token);
 			setUser(data.user);
-			router.push("/complete-profile");
+			router.replace("/complete-profile");
 		},
 	});
+
+	useEffect(() => {
+		if (!user?.isEmailVerified) return;
+		router.replace(user.isProfileCompleted ? "/home" : "/complete-profile");
+	}, [router, user?.isEmailVerified, user?.isProfileCompleted]);
 
 	const resendMutation = useMutation({
 		mutationKey: ["auth", "resend-email-otp"],
 		mutationFn: resendEmailOtp,
 		onSuccess: () => {
 			setCode(["", "", "", "", "", ""]);
+			startCooldown();
 			inputs.current[0]?.focus();
 		},
 	});
+
+	const resendCode = () => {
+		if (isCoolingDown || resendMutation.isPending) return;
+		resendMutation.mutate({ email: registrationData.email });
+	};
 
 	const setDigit = (value: string, index: number) => {
 		const digit = value.replace(/\D/g, "").slice(-1);
@@ -95,7 +108,7 @@ export default function OtpVerification() {
 								</Text>
 							</View>
 						</View>
-						<RemoteArtwork uri="https://res.cloudinary.com/dynopc0cn/image/upload/v1780677746/Container_2_szgvux.svg" width={260} height={260} />
+						<RemoteArtwork uri="https://res.cloudinary.com/dynopc0cn/image/upload/v1780677747/Container_3_dkw5j5.svg" width={280} height={260} />
 					</AnimatedSection>
 
 					<KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} className="flex-1 justify-end">
@@ -133,11 +146,11 @@ export default function OtpVerification() {
 									))}
 								</View>
 
-								<TouchableOpacity className="mt-8 items-center" onPress={() => resendMutation.mutate({ email: registrationData.email })} disabled={resendMutation.isPending}>
+								<TouchableOpacity className="mt-8 items-center" onPress={resendCode} disabled={resendMutation.isPending || isCoolingDown}>
 									<Text className="font-manrope text-sm" style={{ color: theme.colors.textSecondary }}>
 										{"Didn't receive a code? "}
-										<Text className="font-bold" style={{ color: theme.colors.warm }}>
-											{resendMutation.isPending ? "Sending..." : "Resend Code"}
+										<Text className="font-bold" style={{ color: isCoolingDown ? theme.colors.textMuted : theme.colors.warm }}>
+											{resendMutation.isPending ? "Sending..." : isCoolingDown ? `Resend in ${formattedTime}` : "Resend Code"}
 										</Text>
 									</Text>
 								</TouchableOpacity>

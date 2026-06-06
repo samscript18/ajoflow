@@ -1,6 +1,8 @@
 import Logo from "@/components/ui/logo";
 import { AnimatedScreen, AnimatedSection } from "@/components/ui/animated-screen";
+import PasswordInput from "@/components/auth/password-input";
 import GradientButton from "@/components/ui/gradient-button";
+import { useResendCooldown } from "@/hooks/useResendCooldown";
 import { requestForgotPasswordToken, resetPassword, verifyResetOtp } from "@/lib/services/auth.service";
 import { ForgotPasswordForm, ResetPasswordForm, forgotPasswordOtpSchema, forgotPasswordSchema, resetPasswordSchema } from "@/schemas/auth.schema";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -30,6 +32,7 @@ export default function ForgotPassword() {
 	const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
 	const [focused, setFocused] = useState<string>("");
 	const inputs = useRef<(TextInput | null)[]>([]);
+	const { formattedTime, isCoolingDown, startCooldown } = useResendCooldown();
 
 	const emailForm = useForm<ForgotPasswordForm>({
 		resolver: zodResolver(forgotPasswordSchema),
@@ -52,6 +55,7 @@ export default function ForgotPassword() {
 		mutationKey: ["auth", "forgot-password"],
 		mutationFn: requestForgotPasswordToken,
 		onSuccess: (_data, variables) => {
+			if (step === "otp") startCooldown();
 			setResetEmail(variables.email);
 			setStep("otp");
 			setTimeout(() => inputs.current[0]?.focus(), 260);
@@ -109,7 +113,7 @@ export default function ForgotPassword() {
 	};
 
 	const resendCode = () => {
-		if (!resetEmail || requestMutation.isPending) return;
+		if (!resetEmail || requestMutation.isPending || isCoolingDown) return;
 		requestMutation.mutate({ email: resetEmail });
 	};
 
@@ -244,11 +248,11 @@ export default function ForgotPassword() {
 												))}
 											</View>
 
-											<TouchableOpacity className="mt-8 items-center" onPress={resendCode}>
+											<TouchableOpacity className="mt-8 items-center" onPress={resendCode} disabled={requestMutation.isPending || isCoolingDown}>
 												<Text className="font-manrope text-sm" style={{ color: theme.colors.textSecondary }}>
 													{"Didn't receive a code? "}
-													<Text className="font-bold" style={{ color: theme.colors.warm }}>
-														{requestMutation.isPending ? "Sending..." : "Resend Code"}
+													<Text className="font-bold" style={{ color: isCoolingDown ? theme.colors.textMuted : theme.colors.warm }}>
+														{requestMutation.isPending ? "Sending..." : isCoolingDown ? `Resend in ${formattedTime}` : "Resend Code"}
 													</Text>
 												</Text>
 											</TouchableOpacity>
@@ -313,65 +317,5 @@ export default function ForgotPassword() {
 				</TouchableWithoutFeedback>
 			</SafeAreaView>
 		</LinearGradient>
-	);
-}
-
-function PasswordInput({
-	control,
-	name,
-	label,
-	focused,
-	setFocused,
-	show,
-	setShow,
-}: {
-	control: ReturnType<typeof useForm<ResetPasswordForm>>["control"];
-	name: "password" | "confirmPassword";
-	label: string;
-	focused: string;
-	setFocused: (value: string) => void;
-	show: boolean;
-	setShow: (value: boolean) => void;
-}) {
-	const { theme } = useThemeStore();
-
-	return (
-		<View className="mt-6">
-			<Text className="font-manrope mb-2 text-xs font-extrabold uppercase tracking-[1.8px]" style={{ color: theme.colors.textMuted }}>
-				{label}
-			</Text>
-			<Controller
-				control={control}
-				name={name}
-				render={({ field: { value, onChange, onBlur }, fieldState }) => (
-					<View
-						className="h-[58px] flex-row items-center rounded-2xl px-5"
-						style={{
-							backgroundColor: theme.colors.surfaceMuted,
-							borderWidth: 1,
-							borderColor: fieldState.error ? theme.colors.error : focused === name ? theme.colors.primary : theme.colors.inputBorder,
-						}}
-					>
-						<TextInput
-							value={value}
-							onChangeText={onChange}
-							onFocus={() => setFocused(name)}
-							onBlur={() => {
-								onBlur();
-								setFocused("");
-							}}
-							placeholder={label}
-							placeholderTextColor={theme.colors.textMuted}
-							secureTextEntry={!show}
-							className="flex-1 font-manrope text-base font-semibold"
-							style={{ color: theme.colors.textPrimary }}
-						/>
-						<TouchableOpacity onPress={() => setShow(!show)}>
-							<Ionicons name={show ? "eye-off-outline" : "eye-outline"} size={21} color={theme.colors.textSecondary} />
-						</TouchableOpacity>
-					</View>
-				)}
-			/>
-		</View>
 	);
 }

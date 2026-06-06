@@ -20,7 +20,7 @@ export class MailService {
 		const { to, template, context, subject } = dto;
 		try {
 			await this.mailerService.sendMail({
-				from: this.configService.get<string>("MAILER_FROM_EMAIL") || this.configService.get<string>("SMTP_FROM"),
+				from: this.configService.get<string>("MAILER_FROM_EMAIL"),
 				to,
 				subject,
 				template,

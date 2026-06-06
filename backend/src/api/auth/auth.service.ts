@@ -76,6 +76,7 @@ export class AuthService {
 			email,
 			password: await this.utilsService.hashPassword(data.password),
 			isEmailVerified: false,
+			isProfileCompleted: false,
 			emailOtp: hashedToken,
 			emailOtpExpires: new Date(Date.now() + 10 * 60 * 1000),
 		};
@@ -131,7 +132,10 @@ export class AuthService {
 		user.profileImage = data.profileImage;
 		user.bio = data.bio;
 		user.bankName = data.bankName;
+		user.bankCode = data.bankCode;
+		user.accountName = data.accountName;
 		user.accountNumber = data.accountNumber;
+		user.isProfileCompleted = true;
 		await user.save();
 
 		return { user: this.utilsService.excludePassword(user), token: await this.signToken(user) };

@@ -35,6 +35,8 @@ export type CompleteProfileDto = {
 	profileImage?: string;
 	bio?: string;
 	bankName?: string;
+	bankCode?: string;
+	accountName?: string;
 	accountNumber?: string;
 };
 
@@ -65,3 +67,5 @@ export type MessagePayload = {
 	success: boolean;
 	message: string;
 };
+
+

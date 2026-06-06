@@ -40,13 +40,19 @@ export default function Login() {
 		mode: "onChange",
 	});
 	const watchedEmail = watch("email");
+	const watchedPassword = watch("password") ?? "";
 	const debouncedEmail = useDebounce(watchedEmail.trim().toLowerCase(), 650);
+	const passwordStrengthScore = [watchedPassword.length >= 8, /[A-Z]/.test(watchedPassword) && /[a-z]/.test(watchedPassword), /[0-9]/.test(watchedPassword), /[^a-zA-Z0-9]/.test(watchedPassword)].filter(Boolean).length;
+	const passwordStrength = passwordStrengthScore <= 1 ? "Weak" : passwordStrengthScore <= 3 ? "Fair" : "Strong";
+	const passwordStrengthLevel = passwordStrength === "Weak" ? 1 : passwordStrength === "Fair" ? 2 : 3;
+	const passwordStrengthColor = passwordStrength === "Weak" ? "#FF4D4F" : passwordStrength === "Fair" ? "#FFB020" : "#12B76A";
+	const shouldShowPasswordStrength = emailExists === false && watchedPassword.length > 0;
 
 	const applyAuth = (data: { token: string; user: User }) => {
 		setAccessToken(data.token);
 		setUser(data.user);
 		setIsAuthenticated(true);
-		router.replace("/home");
+		router.replace(data.user.isProfileCompleted ? "/home" : "/complete-profile");
 	};
 
 	const checkEmailMutation = useMutation({
@@ -132,8 +138,6 @@ export default function Login() {
 	};
 
 	const isBusy = checkEmailMutation.isPending || loginMutation.isPending || googleMutation.isPending || signupMutation.isPending;
-	// const emailStatusIcon = errors.email ? "close-circle" : emailExists !== null && watchedEmail.trim().toLowerCase() === lastCheckedEmail ? "checkmark-circle" : "mail-outline";
-	// const emailStatusColor = errors.email ? theme.colors.error : emailExists !== null && watchedEmail.trim().toLowerCase() === lastCheckedEmail ? theme.colors.success : theme.colors.textMuted;
 
 	return (
 		<LinearGradient colors={isDark ? theme.gradients.darkBackground : theme.gradients.lightBackground} style={{ flex: 1 }}>
@@ -179,7 +183,7 @@ export default function Login() {
 										Your money. Your community. <Text style={{ color: theme.colors.warm, fontWeight: "800" }}>Fully transparent.</Text>
 									</Text>
 
-									<View className="mt-[34px]">
+									<View className="mt-6">
 										<Text className="mb-2.5 font-manrope text-[11px] font-black uppercase tracking-[1.8px]" style={{ color: theme.colors.textMuted }}>
 											Email address
 										</Text>
@@ -227,12 +231,12 @@ export default function Login() {
 											className="mt-2 font-manrope text-xs font-semibold"
 											style={{ color: errors.email ? theme.colors.error : emailExists === false ? theme.colors.success : theme.colors.textMuted }}
 										>
-											{errors.email?.message ?? (checkEmailMutation.isPending ? "Checking email..." : null)}
+											{errors.email && errors.email.message}
 										</Text>
 									</View>
 
 									{emailExists !== null && (
-										<View className="mt-5">
+										<View className="mt-1">
 											<Text className="mb-2.5 font-manrope text-[11px] font-black uppercase tracking-[1.8px]" style={{ color: theme.colors.textMuted }}>
 												Password
 											</Text>
@@ -275,6 +279,45 @@ export default function Login() {
 												<Text className="mt-2 font-manrope text-xs font-semibold" style={{ color: theme.colors.error }}>
 													{errors.password.message}
 												</Text>
+											)}
+											{shouldShowPasswordStrength && (
+												<View className="mt-3">
+													<View className="mb-2 flex-row items-center justify-between">
+														<Text
+															className="font-manrope text-[11px] font-black uppercase tracking-[1.5px]"
+															style={{ color: theme.colors.textMuted }}
+														>
+															Password strength
+														</Text>
+														<Text className="font-manrope text-xs font-black" style={{ color: passwordStrengthColor }}>
+															{passwordStrength}
+														</Text>
+													</View>
+													<View className="flex-row gap-1.5">
+														{[1, 2, 3].map((level) => (
+															<View
+																key={level}
+																className="h-1 flex-1 overflow-hidden rounded-full"
+																style={{ backgroundColor: theme.colors.surfaceMuted }}
+															>
+																{level <= passwordStrengthLevel && (
+																	<LinearGradient
+																		colors={
+																			passwordStrength === "Weak"
+																				? ["#FF6B6B", "#FF4D4F"]
+																				: passwordStrength === "Fair"
+																					? ["#FFD166", "#FFB020"]
+																					: ["#47E6A1", "#12B76A"]
+																		}
+																		start={{ x: 0, y: 0 }}
+																		end={{ x: 1, y: 0 }}
+																		style={{ flex: 1 }}
+																	/>
+																)}
+															</View>
+														))}
+													</View>
+												</View>
 											)}
 										</View>
 									)}

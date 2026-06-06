@@ -91,6 +91,12 @@ export class CompleteProfileDto {
 	bankName?: string;
 
 	@IsString(true)
+	bankCode?: string;
+
+	@IsString(true)
+	accountName?: string;
+
+	@IsString(true)
 	@Matches(/^\d{10}$/, { message: "Account number must be 10 digits" })
 	accountNumber?: string;
 }

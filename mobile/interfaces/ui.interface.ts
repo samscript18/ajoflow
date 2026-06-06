@@ -1,10 +1,24 @@
+import { Bank } from "@/types/paystack/paystack";
 import { ImageStyle, StyleProp } from "react-native";
 import { ComponentProps, ReactNode } from "react";
 import { Ionicons } from "@expo/vector-icons";
+import { Control } from "react-hook-form";
+import { ResetPasswordForm } from "@/schemas/auth.schema";
 
 export interface LogoProps {
 	size?: number;
 	style?: StyleProp<ImageStyle>;
+}
+
+export interface BankSelectProps {
+	label: string;
+	value: string;
+	placeholder: string;
+	onPress: () => void;
+}
+
+export interface BankLogoProps {
+	bank: Bank;
 }
 
 export interface ProfileInputProps {
@@ -15,6 +29,7 @@ export interface ProfileInputProps {
 	onBlur?: () => void;
 	autoCapitalize?: "none" | "sentences" | "words" | "characters";
 	keyboardType?: "default" | "number-pad";
+	rightElement?: ReactNode;
 }
 
 export interface AnimatedScreenProps {
@@ -46,4 +61,14 @@ export interface RemoteArtworkProps {
 	height: number;
 	className?: string;
 	style?: StyleProp<ImageStyle>;
+}
+
+export interface AuthPasswordInputProps {
+	control: Control<ResetPasswordForm>;
+	name: "password" | "confirmPassword";
+	label: string;
+	focused: string;
+	setFocused: (value: string) => void;
+	show: boolean;
+	setShow: (value: boolean) => void;
 }

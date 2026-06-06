@@ -1,1 +1,0 @@
-auth storage isn't storing data for example hasCompletedOnboarding is either not being stored or is beind reset on app reload

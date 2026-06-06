@@ -12,7 +12,7 @@ const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
 
 export default function Index() {
 	const router = useRouter();
-	const { hasCompletedOnboarding, isAuthenticated } = useAuthStore();
+	const { hasCompletedOnboarding, isAuthenticated, user } = useAuthStore();
 	const { theme } = useThemeStore();
 
 	const progress = useSharedValue<number>(0);
@@ -33,11 +33,11 @@ export default function Index() {
 				return;
 			}
 
-			router.replace("/home");
+			router.replace(user?.isProfileCompleted ? "/home" : "/complete-profile");
 		}, 3000);
 
 		return () => clearTimeout(timeout);
-	}, [hasCompletedOnboarding, isAuthenticated, progress, router]);
+	}, [hasCompletedOnboarding, isAuthenticated, progress, router, user?.isProfileCompleted]);
 
 	const progressStyle = useAnimatedStyle(() => ({
 		width: `${progress.value}%`,

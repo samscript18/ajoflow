@@ -7,8 +7,11 @@ export type User = {
 	profileImage?: string;
 	bio?: string;
 	bankName?: string;
+	bankCode?: string;
+	accountName?: string;
 	accountNumber?: string;
 	isEmailVerified?: boolean;
+	isProfileCompleted?: boolean;
 	expoPushTokens?: {
 		token: string;
 		platform: "ios" | "android";

@@ -62,6 +62,8 @@ export const profileSchema = z.object({
 	fullName: z.string().trim().min(2, "Enter your full name"),
 	userName: signupSchema.shape.userName,
 	bankName: z.string().trim().optional(),
+	bankCode: z.string().trim().optional(),
+	accountName: z.string().trim().optional(),
 	accountNumber: z
 		.string()
 		.trim()

@@ -32,6 +32,12 @@ export class User {
 	bankName?: string;
 
 	@Prop()
+	bankCode?: string;
+
+	@Prop()
+	accountName?: string;
+
+	@Prop()
 	accountNumber?: string;
 
 	@Prop()
@@ -42,6 +48,9 @@ export class User {
 
 	@Prop({ default: false })
 	isEmailVerified?: boolean;
+
+	@Prop({ default: false })
+	isProfileCompleted?: boolean;
 
 	@Prop()
 	emailOtp?: string;
