@@ -4,9 +4,9 @@ import { HealthModule } from "./health/health.module";
 import { UploadModule } from "./upload/upload.module";
 import { AuthModule } from "./auth/auth.module";
 import { NotificationModule } from "./notification/notification.module";
-import { PaystackModule } from "./paystack/paystack.module";
+import { IntegrationsModule } from "./integrations/integrations.module";
 
 @Module({
-	imports: [DatabaseModule, HealthModule, AuthModule, UploadModule, NotificationModule, PaystackModule],
+	imports: [DatabaseModule, HealthModule, AuthModule, UploadModule, NotificationModule, IntegrationsModule],
 })
 export class ApiModule {}

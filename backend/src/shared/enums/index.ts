@@ -5,4 +5,5 @@ export enum RoleNames {
 
 export enum EventNames {
 	SendMail = "send.mail",
+	NotificationCreated = "notification.created",
 }

@@ -1,20 +1,19 @@
 import { Injectable, Logger, NotFoundException } from "@nestjs/common";
+import { EventEmitter2, OnEvent } from "@nestjs/event-emitter";
 import { InjectModel } from "@nestjs/mongoose";
 import axios from "axios";
 import { FilterQuery, Model, Types } from "mongoose";
 import { User, UserDocument } from "src/api/auth/schemas/user.schema";
-import { GetNotificationsDto, RegisterExpoPushTokenDto, RemoveExpoPushTokenDto, UpdateNotificationPreferenceDto } from "./dto/notification.dto";
+import { EventNames } from "src/shared/enums";
+import {
+	GetNotificationsDto,
+	RegisterExpoPushTokenDto,
+	RemoveExpoPushTokenDto,
+	UpdateNotificationPreferenceDto,
+} from "./dto/notification.dto";
 import { CreateNotificationPayload } from "./interfaces/notification.interface";
 import { Notification, NotificationDocument } from "./schemas/notification.schema";
-
-type ExpoPushTicket = {
-	status: "ok" | "error";
-	id?: string;
-	message?: string;
-	details?: {
-		error?: string;
-	};
-};
+import { ExpoPushTicket, NotificationCreatedEvent } from "./types/notification.types";
 
 @Injectable()
 export class NotificationService {
@@ -23,6 +22,7 @@ export class NotificationService {
 	constructor(
 		@InjectModel(Notification.name) private readonly notifications: Model<NotificationDocument>,
 		@InjectModel(User.name) private readonly users: Model<UserDocument>,
+		private readonly eventEmitter: EventEmitter2,
 	) {}
 
 	async registerToken(userId: string, dto: RegisterExpoPushTokenDto) {
@@ -46,7 +46,9 @@ export class NotificationService {
 	}
 
 	async updatePreference(userId: string, dto: UpdateNotificationPreferenceDto) {
-		const user = await this.users.findByIdAndUpdate(userId, { "preferences.pushNotifications": dto.pushNotifications }, { new: true }).select("preferences");
+		const user = await this.users
+			.findByIdAndUpdate(userId, { "preferences.pushNotifications": dto.pushNotifications }, { new: true })
+			.select("preferences");
 		if (!user) throw new NotFoundException("User not found");
 
 		return { preferences: user.preferences };
@@ -62,7 +64,10 @@ export class NotificationService {
 		});
 
 		if (payload.sendPush !== false) {
-			await this.sendPushNotification(notification._id);
+			this.eventEmitter.emit(EventNames.NotificationCreated, {
+				notificationId: notification._id,
+				sendPush: true,
+			});
 		}
 
 		return notification;
@@ -88,7 +93,11 @@ export class NotificationService {
 	}
 
 	async markAsRead(userId: string, notificationId: string) {
-		const notification = await this.notifications.findOneAndUpdate({ _id: notificationId, recipient: new Types.ObjectId(userId) }, { isRead: true }, { new: true });
+		const notification = await this.notifications.findOneAndUpdate(
+			{ _id: notificationId, recipient: new Types.ObjectId(userId) },
+			{ isRead: true },
+			{ new: true },
+		);
 		if (!notification) throw new NotFoundException("Notification not found");
 
 		return notification;
@@ -104,9 +113,12 @@ export class NotificationService {
 		return { count };
 	}
 
-	private async sendPushNotification(notificationId: Types.ObjectId) {
+	@OnEvent(EventNames.NotificationCreated)
+	async sendPushNotification(payload: NotificationCreatedEvent) {
+		if (!payload.sendPush) return;
+
 		try {
-			const notification = await this.notifications.findById(notificationId).lean();
+			const notification = await this.notifications.findById(payload.notificationId).lean();
 			if (!notification) return;
 
 			const user = await this.users.findById(notification.recipient).select("expoPushTokens preferences").lean();

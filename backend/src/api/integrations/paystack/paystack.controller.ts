@@ -5,7 +5,7 @@ import { ResolveBankAccountDto } from "./dto/paystack.dto";
 import { PaystackService } from "./paystack.service";
 
 @ApiTags("Paystack")
-@Controller("paystack")
+@Controller("integrations/paystack")
 export class PaystackController {
 	constructor(private readonly paystack: PaystackService) {}
 

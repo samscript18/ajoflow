@@ -8,7 +8,7 @@
 		"start:dev": "nest start --watch",
 		"start:prod": "node dist/main",
 		"test": "npm run build",
-		"lint": "eslint \"src/**/*.ts\" --fix"
+		"lint": "eslint \"src/**/*.ts\""
 	},
 	"dependencies": {
 		"@nestjs-modules/mailer": "^2.3.6",

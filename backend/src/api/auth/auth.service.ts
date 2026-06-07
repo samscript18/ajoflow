@@ -10,17 +10,7 @@ import { SendMail } from "src/shared/mail/interfaces";
 import { UtilsService } from "src/shared/services/utils.service";
 import { CompleteProfileDto, RegisterDto, StartSignupDto, VerifyEmailOtpDto } from "./dto/auth.dto";
 import { User, UserDocument } from "./schemas/user.schema";
-
-type GoogleTokenInfo = {
-	aud?: string;
-	sub?: string;
-	email?: string;
-	given_name?: string;
-	family_name?: string;
-	name?: string;
-	picture?: string;
-	error_description?: string;
-};
+import { GoogleTokenInfo } from "./types/google-token-info.type";
 
 @Injectable()
 export class AuthService {
@@ -81,7 +71,9 @@ export class AuthService {
 			emailOtpExpires: new Date(Date.now() + 10 * 60 * 1000),
 		};
 
-		const user = existingUser ? await this.users.findByIdAndUpdate(existingUser._id, payload, { new: true }) : await this.users.create(payload);
+		const user = existingUser
+			? await this.users.findByIdAndUpdate(existingUser._id, payload, { new: true })
+			: await this.users.create(payload);
 		if (!user) throw new BadRequestException("Unable to start signup");
 
 		await this.sendEmailOtp(user, token);
@@ -184,9 +176,18 @@ export class AuthService {
 				userName: await this.uniqueUsername(tokenInfo.email, tokenInfo.name ?? firstName),
 				googleId: tokenInfo.sub,
 				profileImage: tokenInfo.picture,
+				isEmailVerified: true,
+				isProfileCompleted: false,
 			});
-		} else if (!user.googleId) {
-			user.googleId = tokenInfo.sub;
+		} else {
+			const firstName = tokenInfo.given_name ?? tokenInfo.name?.split(" ")[0] ?? "";
+			const lastName = tokenInfo.family_name ?? tokenInfo.name?.split(" ").slice(1).join(" ") ?? "";
+			user.googleId = user.googleId || tokenInfo.sub;
+			user.isEmailVerified = true;
+			user.isProfileCompleted = user.isProfileCompleted ?? false;
+			user.firstName = user.firstName || firstName;
+			user.lastName = user.lastName || lastName;
+			user.profileImage = user.profileImage || tokenInfo.picture;
 			await user.save();
 		}
 
